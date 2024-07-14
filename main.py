@@ -3,7 +3,7 @@ import dspy
 ollama_model = dspy.OllamaLocal(
     model="llama2",
     model_type='text',
-    max_tokens=350,
+    max_tokens=500,
     temperature=0.0,
     top_p=0.8,
     frequency_penalty=1.17,
@@ -13,7 +13,8 @@ ollama_model = dspy.OllamaLocal(
 dspy.settings.configure(lm=ollama_model)
 
 sentiment_model = dspy.Predict('sentence -> sentiment')
-sentiment = dspy.OutputField(desc="Possible choices: excellent, good, neutral, bad, very poor, fail.")
+response = dspy.InputField(desc="The essay to be reviewed.")
+sentiment = dspy.OutputField(desc="Possible choices: excellent, good, neutral, bad, very poor, fail.", prefix="Sentiment:")
 
 def generate_remarks(essay_text, criteria):
     criteria_str = ", ".join(criteria)
@@ -23,14 +24,12 @@ def generate_remarks(essay_text, criteria):
     if isinstance(response, list) and response:
         remarks = "\n".join(response)
         return remarks.strip()
-    elif isinstance(response, str):
-        return response.strip()
     raise ValueError("Unexpected response format from Ollama model")
 
 def analyze_sentiment(remarks):
-    sentiment_response = sentiment_model(sentence=remarks)
+    sentiment = sentiment_model(sentence=remarks)
     #print("Sentiment Model Response:", sentiment_response) #Testing
-    sentiment = sentiment_response['sentiment'].strip().lower()
+    sentiment = sentiment['sentiment'].strip().lower()
     return sentiment
 
 def grade_essay(sentiment):
@@ -44,7 +43,7 @@ def grade_essay(sentiment):
         return "S"
     elif "very poor" in sentiment:
         return "D"
-    else:
+    elif "fail" in sentiment:
         return "F"
 
 def load_essay(input_path):
