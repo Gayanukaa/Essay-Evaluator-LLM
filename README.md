@@ -2,7 +2,7 @@
 Build and compare performance of essay evaluator in DSPy
 
 
-## Steps
+## Configuration
 
 Download local model. I have used [llama2 7B](https://ollama.com/library/llama2)
 
@@ -19,3 +19,9 @@ Activate conda environment
 ```bash
 conda activate lmql-dev
 ```
+
+## Execution
+
+To execute and test locally run ```main.py```
+
+To execute the interface using streamlit run  ```streamlit run evaluator.py```
