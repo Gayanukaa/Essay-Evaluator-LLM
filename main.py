@@ -3,8 +3,8 @@ import dspy
 ollama_model = dspy.OllamaLocal(
     model="llama2",
     model_type='text',
-    max_tokens=500,
-    temperature=0.0,
+    max_tokens=1000,
+    temperature=0.1,
     top_p=0.8,
     frequency_penalty=1.17,
     top_k=40
@@ -20,7 +20,7 @@ def generate_remarks(essay_text, criteria):
     criteria_str = ", ".join(criteria)
     prompt = f"Evaluate this essay based on the following criteria: {criteria_str}. Provide remarks: {essay_text} all in one paragraph"
     response = ollama_model(prompt)
-    #print("Ollama Model Response:", response) #Testing
+    #print("Ollama Model Response:", response)
     if isinstance(response, list) and response:
         remarks = "\n".join(response)
         return remarks.strip()
@@ -28,23 +28,23 @@ def generate_remarks(essay_text, criteria):
 
 def analyze_sentiment(remarks):
     sentiment = sentiment_model(sentence=remarks)
-    #print("Sentiment Model Response:", sentiment_response) #Testing
+    #print("Sentiment Model Response:", sentiment_response)
     sentiment = sentiment['sentiment'].strip().lower()
     return sentiment
 
 def grade_essay(sentiment):
-    if "excellent" in sentiment:
-        return "A"
-    elif "good" in sentiment:
-        return "B"
-    elif "neutral" in sentiment:
-        return "C"
-    elif "bad" in sentiment:
-        return "S"
-    elif "very poor" in sentiment:
-        return "D"
-    elif "fail" in sentiment:
-        return "F"
+    grades = {
+        "excellent": "A",
+        "good": "B",
+        "neutral": "C",
+        "bad": "S",
+        "very poor": "D",
+        "fail": "F"
+    }
+    for key in grades:
+        if key in sentiment:
+            return grades[key]
+    return "Try Again"
 
 def load_essay(input_path):
     with open(input_path, "r") as file:
@@ -66,5 +66,5 @@ def main_pipeline(input_path, output_path, criteria):
 
 input_path = "/home/gayanukaa/llm-test/dspy-test/essay/essay.txt"
 output_path = "/home/gayanukaa/llm-test/dspy-test/essay/evaluation.txt"
-criteria = ["clarity", "coherency", "grammar"]
+criteria = ["clarity", "coherency", "structure"]
 main_pipeline(input_path, output_path, criteria)

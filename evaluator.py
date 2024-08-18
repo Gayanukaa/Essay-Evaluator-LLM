@@ -3,20 +3,21 @@ import dspy
 from fpdf import FPDF
 import base64
 
-# Configure the model
 ollama_model = dspy.OllamaLocal(
     model="llama2",
     model_type='text',
-    max_tokens=500,
-    temperature=0.0,
+    max_tokens=1000,
+    temperature=0.1,
     top_p=0.8,
     frequency_penalty=1.17,
     top_k=40
 )
+
 dspy.settings.configure(lm=ollama_model)
 
-# Initialize the sentiment model
 sentiment_model = dspy.Predict('sentence -> sentiment')
+response = dspy.InputField(desc="The essay to be reviewed.")
+sentiment = dspy.OutputField(desc="Possible choices: excellent, good, neutral, bad, very poor, fail.", prefix="Sentiment:")
 
 def generate_remarks(essay_text, criteria):
     criteria_str = ", ".join(criteria)
@@ -33,18 +34,18 @@ def analyze_sentiment(remarks):
     return sentiment
 
 def grade_essay(sentiment):
-    if "excellent" in sentiment:
-        return "A"
-    elif "good" in sentiment:
-        return "B"
-    elif "neutral" in sentiment:
-        return "C"
-    elif "bad" in sentiment:
-        return "S"
-    elif "very poor" in sentiment:
-        return "D"
-    elif "fail" in sentiment:
-        return "F"
+    grades = {
+        "excellent": "A",
+        "good": "B",
+        "neutral": "C",
+        "bad": "S",
+        "very poor": "D",
+        "fail": "F"
+    }
+    for key in grades:
+        if key in sentiment:
+            return grades[key]
+    return "Try Again"
 
 def create_pdf(remarks, grade):
     pdf = FPDF()
@@ -67,12 +68,14 @@ def convert_pdf_to_base64(pdf):
     return href
 
 def main():
-    st.title("Essay Evaluation Tool")
+    st.title("Essay Evaluator")
 
     st.write("Paste your essay text below for evaluation:")
     essay_text = st.text_area("Essay Text")
 
-    criteria = ["clarity", "coherency", "grammar"]
+    st.write("Enter evaluation criteria separated by commas (e.g., clarity, coherency, structure):")
+    criteria_input = st.text_input("Criteria", value="clarity, coherency, structure")
+    criteria = [c.strip() for c in criteria_input.split(",")]
 
     if st.button("Evaluate Essay"):
         if essay_text:
