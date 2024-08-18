@@ -56,7 +56,7 @@ ollama pull llama2
 My detailed guide on how to run the project on local models. Check out my [Medium article](https://medium.com/@gayanukaamarasuriya/dspy-guide-running-your-project-on-local-models-part-1-d4dc22453620).
 
 <p align="center">
-<img src="Medium Cover Images.png" alt="Medium Article Cover Image">
+<img src="medium cover image.png" alt="Medium Article Cover Image">
 </p>
 
 
